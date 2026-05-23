@@ -1,0 +1,17 @@
+{
+  "name": "creatorbridge-iq",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:ai": "uvicorn app.main:app --reload --app-dir ai-service",
+    "build": "npm run build --workspace frontend && npm run build --workspace backend",
+    "seed": "npm run seed --workspace backend"
+  }
+}

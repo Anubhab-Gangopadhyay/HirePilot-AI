@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CREATOR
+  BRAND
+}
+
+enum Platform {
+  INSTAGRAM
+  YOUTUBE
+}
+
+enum CampaignStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  REJECTED
+  APPROVED
+}
+
+enum PaymentStatus {
+  PENDING
+  ESCROW_HELD
+  RELEASED
+  REFUNDED
+}
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  passwordHash      String
+  role              UserRole
+  name              String
+  city              String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  creatorProfile    CreatorProfile?
+  brandProfile      BrandProfile?
+  campaigns         Campaign[]          @relation("BrandCampaigns")
+  applications      Application[]
+  socialAccounts    SocialAccount[]
+  analyticsRecords  AnalyticsData[]
+  ratingsReceived   Rating[]            @relation("RateeRatings")
+  ratingsGiven      Rating[]            @relation("RaterRatings")
+  trustMetrics      TrustMetric?
+  paymentsAsBrand   Payment[]           @relation("BrandPayments")
+  paymentsAsCreator Payment[]           @relation("CreatorPayments")
+}
+
+model CreatorProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  niche            String
+  platform         Platform
+  followers        Int      @default(0)
+  engagementRate   Float    @default(0)
+  audienceLocation String
+  avgLikes         Float    @default(0)
+  avgComments      Float    @default(0)
+  avgViews         Float    @default(0)
+  audienceQuality  Float    @default(0)
+  completionRate   Float    @default(0)
+  latitude         Float?
+  longitude        Float?
+  user             User     @relation(fields: [userId], references: [id])
+}
+
+model BrandProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  companyName String
+  companyInfo String
+  budget      Float  @default(0)
+  industry    String
+  rating      Float  @default(0)
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model SocialAccount {
+  id           String    @id @default(cuid())
+  userId       String
+  platform     Platform
+  username     String
+  accessToken  String
+  refreshToken String?
+  tokenExpiry  DateTime?
+  accountId    String
+  metadata     Json?
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, platform])
+}
+
+model Campaign {
+  id           String         @id @default(cuid())
+  brandId      String
+  title        String
+  budget       Float
+  niche        String
+  requirements String
+  targetCity   String?
+  status       CampaignStatus @default(OPEN)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  brand        User           @relation("BrandCampaigns", fields: [brandId], references: [id])
+  applications Application[]
+  payments     Payment[]
+}
+
+model Application {
+  id           String            @id @default(cuid())
+  campaignId   String
+  creatorId    String
+  message      String?
+  proposedRate Float?
+  status       ApplicationStatus @default(APPLIED)
+  createdAt    DateTime          @default(now())
+  campaign     Campaign          @relation(fields: [campaignId], references: [id])
+  creator      User              @relation(fields: [creatorId], references: [id])
+
+  @@unique([campaignId, creatorId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  campaignId        String
+  brandId           String
+  creatorId         String
+  amount            Float
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  status            PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  campaign          Campaign      @relation(fields: [campaignId], references: [id])
+  brand             User          @relation("BrandPayments", fields: [brandId], references: [id])
+  creator           User          @relation("CreatorPayments", fields: [creatorId], references: [id])
+}
+
+model Rating {
+  id           String   @id @default(cuid())
+  campaignId   String
+  raterId      String
+  rateeId      String
+  rating       Float
+  completion   Float
+  responseTime Float
+  review       String?
+  createdAt    DateTime @default(now())
+  rater        User     @relation("RaterRatings", fields: [raterId], references: [id])
+  ratee        User     @relation("RateeRatings", fields: [rateeId], references: [id])
+}
+
+model LeaderboardSnapshot {
+  id          String   @id @default(cuid())
+  type        String
+  referenceId String
+  displayName String
+  niche       String?
+  score       Float
+  metric      Float
+  rank        Int
+  createdAt   DateTime @default(now())
+}
+
+model AnalyticsData {
+  id             String   @id @default(cuid())
+  userId         String
+  platform       Platform
+  followers      Int
+  engagementRate Float
+  avgLikes       Float
+  avgComments    Float
+  avgViews       Float
+  growth         Float
+  topPosts       Json
+  capturedAt     DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model TrustMetric {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  trustScore    Float    @default(0)
+  ratingAvg     Float    @default(0)
+  completionAvg Float    @default(0)
+  responseAvg   Float    @default(0)
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+}
