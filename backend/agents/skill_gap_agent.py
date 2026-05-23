@@ -5,6 +5,7 @@ import asyncio
 from models.workflow_models import AgentStatus, JobApplicationResult, LogLevel, WorkflowState
 from services.log_service import WorkflowLogService
 from services.openai_service import OpenAIService, openai_service
+from services.skill_analysis_service import skill_analysis_service
 
 try:
     from crewai import Agent
@@ -44,8 +45,22 @@ class SkillGapAgent:
             state.agent_status[self.name] = AgentStatus.failed
             return state
 
-        await self.logs.emit(state, "Skill Gap Agent", "Skills extracted from resume")
-        await self.logs.emit(state, "Skill Gap Agent", "Job description analyzed")
+        resume_skills = skill_analysis_service.extract_resume_skills(state.uploaded_resume)
+        job_requirements = skill_analysis_service.extract_job_skill_requirements(state.selected_job)
+        await self.logs.emit(
+            state,
+            "Skill Gap Agent",
+            f"Parsed {len(resume_skills)} resume skills",
+            LogLevel.success,
+            {"resume_skills": resume_skills},
+        )
+        await self.logs.emit(
+            state,
+            "Skill Gap Agent",
+            f"Parsed {len(job_requirements['required_skills'])} required JD skills",
+            LogLevel.success,
+            job_requirements,
+        )
 
         analysis = await self.llm.analyze_skill_gap(
             state.uploaded_resume,
@@ -61,7 +76,13 @@ class SkillGapAgent:
             "Skill Gap Agent",
             "Missing skills detected",
             LogLevel.success,
-            {"missing_skills": analysis.missing_skills, "weak_areas": analysis.weak_areas},
+            {
+                "resume_skills": analysis.resume_skills,
+                "required_skills": analysis.required_skills,
+                "matched_skills": analysis.matched_skills,
+                "missing_skills": analysis.missing_skills,
+                "weak_areas": analysis.weak_areas,
+            },
         )
         await self.logs.emit(
             state,
@@ -75,6 +96,19 @@ class SkillGapAgent:
 
     async def analyze_result(self, state: WorkflowState, result: JobApplicationResult) -> JobApplicationResult:
         await self.logs.emit(state, "Skill Gap Agent", f"Analyzing skill gap for {result.job.company}")
+        resume_skills = skill_analysis_service.extract_resume_skills(state.uploaded_resume)
+        job_requirements = skill_analysis_service.extract_job_skill_requirements(result.job)
+        await self.logs.emit(
+            state,
+            "Skill Gap Agent",
+            f"{result.job.company}: parsed resume vs JD skills",
+            LogLevel.info,
+            {
+                "resume_skills": resume_skills,
+                "required_skills": job_requirements["required_skills"],
+                "preferred_skills": job_requirements["preferred_skills"],
+            },
+        )
         analysis = await self.llm.analyze_skill_gap(
             state.uploaded_resume,
             result.job,
@@ -86,7 +120,11 @@ class SkillGapAgent:
             "Skill Gap Agent",
             f"{result.job.company}: skill match {analysis.skill_match_percent}%",
             LogLevel.success,
-            {"missing_skills": analysis.missing_skills},
+            {
+                "matched_skills": analysis.matched_skills,
+                "missing_skills": analysis.missing_skills,
+                "required_skills": analysis.required_skills,
+            },
         )
         return result
 
