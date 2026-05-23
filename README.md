@@ -1,96 +1,129 @@
-# CreatorBridge IQ
+# HirePilot AI
+## Autonomous Multi-Agent Job Application Copilot
 
-CreatorBridge IQ is a production-shaped MVP for the creator economy: creators connect Instagram and YouTube analytics, brands launch campaigns, AI prices creator work, campaign-fit matching ranks talent, discovery works on a map, escrow is handled through Razorpay, and trust plus leaderboard systems reflect performance over time.
+HirePilot AI is an AI-native employability intelligence platform powered by coordinated multi-agent workflows.
 
-## Stack
+The platform helps users:
+- discover relevant jobs,
+- optimize resumes,
+- improve ATS compatibility,
+- identify missing skills,
+- prepare applications,
+- and track applications intelligently in real time.
 
-- Frontend: Next.js App Router, Tailwind CSS v4, Chart.js, Mapbox GL
-- Backend: Node.js, Express, Prisma, PostgreSQL, JWT auth
-- AI service: FastAPI, scikit-learn Linear Regression
-- Integrations: Instagram Graph API, YouTube Data API v3, Razorpay test mode, Mapbox
+Unlike traditional auto-apply tools, HirePilot AI focuses on:
+> improving employability intelligently instead of mass applying blindly.
 
-## Project structure
+---
 
-- `frontend/` Next.js UI with dashboard, campaigns, calculator, leaderboard, and profile/discovery flows
-- `backend/` Express APIs, Prisma schema, seeds, social integrations, pricing, matching, payments, and trust logic
-- `ai-service/` FastAPI prediction service for pricing, ROI, and income
+# 🚀 Core Features
 
-## Setup
+## 🤖 Multi-Agent AI Orchestration
+- Central Orchestrator Agent
+- Coordinated AI workflows
+- Real-time agent communication
+- Workflow state management
 
-1. Copy the environment templates:
-   - root: `.env.example` -> `.env`
-   - backend: `backend/.env.example` -> `backend/.env`
-   - frontend: `frontend/.env.example` -> `frontend/.env.local`
-2. Install Node dependencies from the repo root:
-   - `npm install`
-3. Install Python dependencies:
-   - `pip install -r ai-service/requirements.txt`
-4. Generate Prisma client and run migrations:
-   - `npm run prisma:generate --workspace backend`
-   - `npm run prisma:migrate --workspace backend`
-5. Seed the database:
-   - `npm run seed`
+---
 
-## Run locally
+## 🔍 AI Job Discovery Agent
+Fetches relevant jobs from:
+- LinkedIn
+- Naukri
+- Indeed
+- Company career pages
 
-Open three terminals.
+Features:
+- AI-based filtering
+- Role matching
+- Location matching
+- Skill relevance ranking
 
-1. Backend API:
-   - `npm run dev:backend`
-2. Frontend:
-   - `npm run dev:frontend`
-3. AI service:
-   - `npm run dev:ai`
+---
 
-## Seeded accounts
+## 📄 ATS Resume Intelligence Agent
+- Resume tailoring for EACH job
+- ATS optimization
+- Keyword insertion
+- Cover letter generation
+- ATS score generation
 
-- Creator: `aarav@creatorbridgeiq.com` / `Password123!`
-- Creator: `naina@creatorbridgeiq.com` / `Password123!`
-- Brand: `orbit@creatorbridgeiq.com` / `Password123!`
+---
 
-## Core API surface
+## 🧠 Skill Gap Intelligence Agent (Main USP)
+Analyzes:
+- missing skills
+- weak competencies
+- employability gaps
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `GET /api/users/profile`
-- `PUT /api/users/profile`
-- `GET /api/users/discover`
-- `POST /api/campaign`
-- `GET /api/campaigns`
-- `POST /api/campaign/apply`
-- `GET /api/campaign/match-creators/:campaignId`
-- `GET /api/analytics/dashboard`
-- `POST /api/analytics/refresh`
-- `GET /api/social/instagram/login`
-- `GET /api/social/youtube/login`
-- `POST /api/social/sync`
-- `POST /api/ai/calculate-price`
-- `POST /api/ai/predict-roi`
-- `POST /api/ai/predict-income`
-- `POST /api/payments/escrow`
-- `POST /api/payments/:paymentId/release`
-- `GET /api/leaderboard`
-- `POST /api/trust`
+Generates:
+- recommendations
+- learning roadmap
+- project suggestions
 
-## Social integration notes
+---
 
-Instagram and YouTube OAuth flows are implemented with real provider endpoints and require valid application credentials in the backend environment file. The scheduler refreshes connected creator analytics every 24 hours using `node-cron`.
+## 🛡 Human-in-the-Loop Apply Agent
+- Prepares applications
+- Autofills forms
+- Uploads optimized resumes
+- Waits for human approval before applying
 
-## Pricing intelligence
+IMPORTANT:
+Applications are NEVER auto-submitted without user approval.
 
-The smart pay calculator combines the requested weighted pricing formula with an AI prediction request to the FastAPI service. If the AI service is unavailable, the backend gracefully falls back to the formula output.
+---
 
-## Payments and trust
+## 📊 Real-Time Google Sheets Tracking
+Automatically updates:
+- company name
+- role
+- ATS score
+- missing skills
+- application status
+- apply links
+- recommendations
 
-Escrow creation uses Razorpay test mode when keys are present. Without keys, the API still records the payment intent in manual test mode so local workflow testing can continue. Trust score updates after ratings are submitted using:
+---
 
-`trust_score = (rating * 0.5) + (completion * 0.3) + (response_time * 0.2)`
+## 🖥 AI Command Center Dashboard
+Live dashboard showing:
+- AI workflow logs
+- agent activity
+- ATS scores
+- skill gaps
+- applications prepared
+- Google Sheets sync status
 
-## Known operational requirements
+---
 
-- PostgreSQL must be running before Prisma migrate/seed steps.
-- Instagram Graph API requires a Facebook page linked to an Instagram business account.
-- YouTube OAuth requires a Google Cloud OAuth client with the redirect URI configured.
-- Mapbox requires `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` for the live map renderer.
-- Razorpay requires test keys to create real orders.
+# 🧠 Why HirePilot AI is Different
+
+Most AI job tools focus on:
+❌ mass applications
+
+HirePilot AI focuses on:
+✅ employability optimization
+
+The platform behaves like:
+> an autonomous AI career intelligence system.
+
+---
+
+# 🏗 System Architecture
+
+```text
+User Uploads Resume
+        ↓
+Orchestrator Agent
+        ↓
+--------------------------------
+| Job Discovery Agent         |
+| Resume Intelligence Agent   |
+| Skill Gap Agent             |
+| Apply Agent                 |
+--------------------------------
+        ↓
+Google Sheets Tracking
+        ↓
+Frontend Dashboard
